@@ -42,6 +42,7 @@ extern "C" {
 /* Exported constants --------------------------------------------------------*/
 /* USER CODE BEGIN EC */
 
+
 /* USER CODE END EC */
 
 /* Exported macro ------------------------------------------------------------*/
@@ -59,12 +60,20 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define B1_Pin GPIO_PIN_13
 #define B1_GPIO_Port GPIOC
+#define BTN_UP_Pin GPIO_PIN_0
+#define BTN_UP_GPIO_Port GPIOC
+#define BTN_DOWN_Pin GPIO_PIN_1
+#define BTN_DOWN_GPIO_Port GPIOC
 #define USART_TX_Pin GPIO_PIN_2
 #define USART_TX_GPIO_Port GPIOA
 #define USART_RX_Pin GPIO_PIN_3
 #define USART_RX_GPIO_Port GPIOA
 #define LD2_Pin GPIO_PIN_5
 #define LD2_GPIO_Port GPIOA
+#define BTN_LEFT_Pin GPIO_PIN_4
+#define BTN_LEFT_GPIO_Port GPIOC
+#define BTN_RIGHT_Pin GPIO_PIN_5
+#define BTN_RIGHT_GPIO_Port GPIOC
 #define TMS_Pin GPIO_PIN_13
 #define TMS_GPIO_Port GPIOA
 #define TCK_Pin GPIO_PIN_14
