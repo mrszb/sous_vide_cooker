@@ -74,6 +74,8 @@ void Error_Handler(void);
 #define BTN_LEFT_GPIO_Port GPIOC
 #define BTN_RIGHT_Pin GPIO_PIN_5
 #define BTN_RIGHT_GPIO_Port GPIOC
+#define COOKER_Pin GPIO_PIN_8
+#define COOKER_GPIO_Port GPIOC
 #define TMS_Pin GPIO_PIN_13
 #define TMS_GPIO_Port GPIOA
 #define TCK_Pin GPIO_PIN_14

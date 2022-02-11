@@ -21,6 +21,7 @@ extern "C" void appmain (void)
 		if (pressed)
 		{
 			 HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+			 HAL_GPIO_TogglePin(COOKER_GPIO_Port, COOKER_Pin);
 		 	 std::cout << int(pressed) << std::endl;
 		}
 
