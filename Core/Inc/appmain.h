@@ -13,6 +13,7 @@
 extern "C" {
 #endif
 	void appmain(void);
+	void on_periodic_timer(void);
 #ifdef __cplusplus
 }
 #endif
