@@ -74,12 +74,24 @@ void Error_Handler(void);
 #define BTN_LEFT_GPIO_Port GPIOC
 #define BTN_RIGHT_Pin GPIO_PIN_5
 #define BTN_RIGHT_GPIO_Port GPIOC
+#define TEMP_DATA_Pin GPIO_PIN_2
+#define TEMP_DATA_GPIO_Port GPIOB
+#define LCD_RST_Pin GPIO_PIN_14
+#define LCD_RST_GPIO_Port GPIOB
 #define COOKER_Pin GPIO_PIN_8
 #define COOKER_GPIO_Port GPIOC
 #define TMS_Pin GPIO_PIN_13
 #define TMS_GPIO_Port GPIOA
 #define TCK_Pin GPIO_PIN_14
 #define TCK_GPIO_Port GPIOA
+#define LCD_SCLK_Pin GPIO_PIN_10
+#define LCD_SCLK_GPIO_Port GPIOC
+#define LCD_DC_Pin GPIO_PIN_11
+#define LCD_DC_GPIO_Port GPIOC
+#define LCD_DN_MOSI_Pin GPIO_PIN_12
+#define LCD_DN_MOSI_GPIO_Port GPIOC
+#define LCD__SCE_Pin GPIO_PIN_2
+#define LCD__SCE_GPIO_Port GPIOD
 #define SWO_Pin GPIO_PIN_3
 #define SWO_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
