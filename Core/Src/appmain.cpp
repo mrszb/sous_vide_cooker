@@ -22,18 +22,12 @@ extern "C" void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	}
 }
 
-extern "C" void on_periodic_timer (void)
-{
-	keys.update(tm++);
-}
-
 extern "C" void appmain (void)
 {
 	HAL_TIM_Base_Start_IT(&htim3);
 	HAL_TIM_Base_Start_IT(&htim10);
 
 	TemperatureSensor tempsensor(TEMP_DATA_GPIO_Port, TEMP_DATA_Pin);
-
 
 	while (1)
 	{
@@ -53,7 +47,6 @@ extern "C" void appmain (void)
 					tempsensor.write (tempsensor.CMD_SKIP_ROM);
 					tempsensor.write (tempsensor.CMD_CONVERT_T); 
 					tempsensor.wait_conversion();
-					//HAL_Delay (800);
 
 					tempsensor.start ();
 					HAL_Delay(1);
@@ -70,7 +63,6 @@ extern "C" void appmain (void)
 
 		 		for (int i = 0; i < 10; i++)
 		 		{
-
 		 			HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
 		 			HAL_GPIO_TogglePin(COOKER_GPIO_Port, COOKER_Pin);
 
