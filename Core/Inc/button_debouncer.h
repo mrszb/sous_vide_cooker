@@ -21,6 +21,8 @@ class ButtonDebouncer
 public:
 	ButtonDebouncer ();
 	ButtonEvent update_with_sampling(bool sample);
+
+	bool is_button_pressed();
 };
 
 

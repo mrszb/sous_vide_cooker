@@ -10,6 +10,11 @@ ButtonDebouncer::ButtonDebouncer()
 	button_pressed = false;
 }
 
+bool ButtonDebouncer::is_button_pressed()
+{
+	return button_pressed;
+}
+
 ButtonEvent ButtonDebouncer::update_with_sampling(bool btn_fresh_sample)
 {
 	// debouncing routine

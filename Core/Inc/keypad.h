@@ -38,7 +38,11 @@ class KeyPad
 
 public:
 	KeyPad();
+
 	uint8_t raw_scan();
+
+	// debounced scan
+	uint8_t scan();
 
 	// needs to be called in regular intervals .. 1ms suggested
 	void update(SYSTEM_TIME tm);

@@ -27,6 +27,18 @@ uint8_t KeyPad::raw_scan()
 			 +  (btn_right == GPIO_PIN_RESET) ? 1  : 0;
 }
 
+uint8_t KeyPad::scan()
+{
+	uint8_t keys = 0;
+	for (size_t key_ix=0; key_ix < NUM_OF_KEYS; key_ix++)
+	{
+		if (debouncer[key_ix].is_button_pressed())
+			keys |=  (1 << key_ix);
+	}
+
+	return keys;
+}
+
 std::string KeyPadEvent::to_debug_string() const
 {
 	std::string s;
