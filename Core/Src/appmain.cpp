@@ -13,9 +13,12 @@ extern TIM_HandleTypeDef htim10;
 SYSTEM_TIME tm = 0;
 KeyPad keys;
 
-extern "C" void on_periodic_timer (void)
+extern "C" void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-	keys.update(tm++);
+	if (htim == &htim3)
+	{
+		keys.update(tm++);
+	}
 }
 
 extern "C" void appmain (void)
