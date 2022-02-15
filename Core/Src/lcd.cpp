@@ -1,6 +1,8 @@
 #include "main.h"
 #include "lcd.h"
-#include "font6x8.h"
+
+// fonts from https://www.eevblog.com/forum/microcontrollers/stm32-nokia-5110-large-font-issue/
+#include "font.h"
 #include <cstring>
 
 #define SPI_TIMEOUT_MS 5
@@ -28,7 +30,6 @@ LCD_Screen::LCD_Screen(SPI_HandleTypeDef* spi,
 				_cePort(cePort), _cePin(cePin),
 				_dcPort(dcPort), _dcPin(dcPin),
 			_vertical_addressing(false)
-
 {}
 
 inline void LCD_Screen::reset()
@@ -164,9 +165,6 @@ void LCD_Screen::init()
 
 HAL_StatusTypeDef LCD_Screen::write_line(uint8_t ixVertical, const std::string& txt)
 {
-	//extern  uint8_t* console_font_6x8;
-	//const uint8_t* font = console_font_6x8;
-	const uint8_t* font = gFont6x8;
 	static_assert(LCD_LINE_LENGTH*LCD_CHAR_WIDTH == 84);
 	uint8_t line_buffer [LCD_LINE_LENGTH*LCD_CHAR_WIDTH] = { 0 };
 	std::string line = txt.substr(0, LCD_LINE_LENGTH);
@@ -175,7 +173,7 @@ HAL_StatusTypeDef LCD_Screen::write_line(uint8_t ixVertical, const std::string& 
 	for (char c : line)
 	{
 		size_t idx = size_t(c);
-		memcpy(&line_buffer[LCD_CHAR_WIDTH*ix], &font[LCD_CHAR_WIDTH*idx], LCD_CHAR_WIDTH);
+		memcpy(&line_buffer[LCD_CHAR_WIDTH*ix], font6_8[idx-0x20], LCD_CHAR_WIDTH);
 		ix++;
 	}
 

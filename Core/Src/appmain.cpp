@@ -35,11 +35,11 @@ extern "C" void appmain (void)
 
 	lcd.init();
 	lcd.clear();
-	lcd.write_line(0, "TESTINGA1");
-	lcd.write_line(1, "ATESTING2");
+	lcd.write_line(0, "TESTINGA1-");
+	lcd.write_line(1, "ATESTING2-");
 	lcd.write_line(2, "BTESTING3");
-	lcd.write_line(3, "");
-	lcd.write_line(4, "");
+	lcd.write_line(3, "@");
+	lcd.write_line(4, "~");
 
 	while (1)
 	{
