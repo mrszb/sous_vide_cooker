@@ -16,8 +16,12 @@
 #include "WProgram.h"
 #include "pid_tester.h"
 
+// TIM10 running at 1MHZ for us delays
+// TIM11 periodic scanning keyboard
+
 extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim10;
+extern TIM_HandleTypeDef htim11;
 extern SPI_HandleTypeDef hspi3;
 
 SYSTEM_TIME tm = 0;
@@ -30,15 +34,44 @@ unsigned long millis()
 
 extern "C" void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
-	if (htim == &htim3)
+	if (htim == &htim11)
 	{
 		keys.update(tm++);
 	}
 }
 
+void PWM_Blinky()
+{
+	int32_t CH3_DC = 0;
+	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
+
+	for (int i =0; i < 5; i++)
+	{
+		while(CH3_DC < 100)
+		{
+			TIM3->CCR3 = CH3_DC;
+			CH3_DC += 10;
+			HAL_Delay(100);
+		}
+		while(CH3_DC > 0)
+		{
+			TIM3->CCR3 = CH3_DC;
+			CH3_DC -= 10;
+			HAL_Delay(100);
+		}
+	}
+}
+
+void PID_simulation()
+{
+	pid_test_setup();
+	while (pid_test_loop())
+		;
+}
+
 extern "C" void appmain (void)
 {
-	HAL_TIM_Base_Start_IT(&htim3);
+	HAL_TIM_Base_Start_IT(&htim11);
 	HAL_TIM_Base_Start_IT(&htim10);
 
 	TemperatureSensor tempsensor(TEMP_DATA_GPIO_Port, TEMP_DATA_Pin);
@@ -50,16 +83,15 @@ extern "C" void appmain (void)
 
 	lcd.init();
 	lcd.clear();
+
+	PWM_Blinky();
+
 	lcd.write_line(0, "TESTING PID");
 	lcd.write_line(1, " |");
 	lcd.write_line(2, " |");
 	lcd.write_line(3, " |");
 	lcd.write_line(4, "START");
-
-	pid_test_setup();
-	while (pid_test_loop())
-		;
-
+	PID_simulation();
 	lcd.write_line(3, "-|-");
 	lcd.write_line(4, "END");
 
