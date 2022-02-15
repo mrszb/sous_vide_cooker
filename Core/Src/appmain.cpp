@@ -16,6 +16,8 @@
 #include "WProgram.h"
 #include "pid_tester.h"
 
+static bool _use_sleep_mode = false;
+
 // TIM10 running at 1MHZ for us delays
 // TIM11 periodic scanning keyboard
 
@@ -34,6 +36,7 @@ unsigned long millis()
 
 extern "C" void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
+	// called each ms
 	if (htim == &htim11)
 	{
 		keys.update(tm++);
@@ -84,19 +87,26 @@ extern "C" void appmain (void)
 	lcd.init();
 	lcd.clear();
 
-	PWM_Blinky();
+	//PWM_Blinky();
 
 	lcd.write_line(0, "TESTING PID");
 	lcd.write_line(1, " |");
 	lcd.write_line(2, " |");
 	lcd.write_line(3, " |");
 	lcd.write_line(4, "START");
-	PID_simulation();
+	//PID_simulation();
 	lcd.write_line(3, "-|-");
 	lcd.write_line(4, "END");
 
 	while (1)
 	{
+		// You might want to sleep between events
+		// periodic interrupt will wake you up ...
+		if (_use_sleep_mode)
+			HAL_PWR_EnterSLEEPMode (
+					PWR_LOWPOWERREGULATOR_ON,
+					PWR_SLEEPENTRY_WFI);
+
 		KeyPadEvent ev;
 		bool has_event = keys.get_next_event(&ev);
 		if (has_event)
