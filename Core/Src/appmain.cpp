@@ -13,6 +13,8 @@
 #include "PID_v1.h"
 #include "PID_AutoTune_v0.h"
 
+#include "WProgram.h"
+#include "pid_tester.h"
 
 extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim10;
@@ -20,6 +22,11 @@ extern SPI_HandleTypeDef hspi3;
 
 SYSTEM_TIME tm = 0;
 KeyPad keys;
+
+unsigned long millis()
+{
+	return tm;
+}
 
 extern "C" void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
@@ -43,11 +50,18 @@ extern "C" void appmain (void)
 
 	lcd.init();
 	lcd.clear();
-	lcd.write_line(0, "TESTINGA1-");
-	lcd.write_line(1, "ATESTING2-");
-	lcd.write_line(2, "BTESTING3");
-	lcd.write_line(3, "@");
-	lcd.write_line(4, "~");
+	lcd.write_line(0, "TESTING PID");
+	lcd.write_line(1, " |");
+	lcd.write_line(2, " |");
+	lcd.write_line(3, " |");
+	lcd.write_line(4, "START");
+
+	pid_test_setup();
+	while (pid_test_loop())
+		;
+
+	lcd.write_line(3, "-|-");
+	lcd.write_line(4, "END");
 
 	while (1)
 	{
