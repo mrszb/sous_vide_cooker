@@ -8,6 +8,11 @@
 #include "temperature_sensor.h"
 #include "lcd.h"
 
+#include "sml.hpp"
+
+#include "PID_v1.h"
+#include "PID_AutoTune_v0.h"
+
 
 extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim10;
