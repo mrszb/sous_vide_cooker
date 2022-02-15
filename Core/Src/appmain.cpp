@@ -6,9 +6,12 @@
 #include "keypad.h"
 #include "delay_us.h"
 #include "temperature_sensor.h"
+#include "lcd.h"
+
 
 extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim10;
+extern SPI_HandleTypeDef hspi3;
 
 SYSTEM_TIME tm = 0;
 KeyPad keys;
@@ -27,6 +30,19 @@ extern "C" void appmain (void)
 	HAL_TIM_Base_Start_IT(&htim10);
 
 	TemperatureSensor tempsensor(TEMP_DATA_GPIO_Port, TEMP_DATA_Pin);
+
+	LCD_Screen lcd(&hspi3,
+	  LCD_RST_GPIO_Port, LCD_RST_Pin,
+	  LCD_SCE_GPIO_Port, LCD_SCE_Pin,
+	  LCD_DC_GPIO_Port, LCD_DC_Pin);
+
+	lcd.init();
+	lcd.clear();
+	lcd.write_line(0, "TESTINGA1-");
+	lcd.write_line(1, "ATESTING2-");
+	lcd.write_line(2, "BTESTING3");
+	lcd.write_line(3, "@");
+	lcd.write_line(4, "~");
 
 	while (1)
 	{

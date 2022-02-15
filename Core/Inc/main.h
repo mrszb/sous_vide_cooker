@@ -90,8 +90,8 @@ void Error_Handler(void);
 #define LCD_DC_GPIO_Port GPIOC
 #define LCD_DN_MOSI_Pin GPIO_PIN_12
 #define LCD_DN_MOSI_GPIO_Port GPIOC
-#define LCD__SCE_Pin GPIO_PIN_2
-#define LCD__SCE_GPIO_Port GPIOD
+#define LCD_SCE_Pin GPIO_PIN_2
+#define LCD_SCE_GPIO_Port GPIOD
 #define SWO_Pin GPIO_PIN_3
 #define SWO_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
