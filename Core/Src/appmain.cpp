@@ -30,7 +30,7 @@ extern TIM_HandleTypeDef htim10;
 extern TIM_HandleTypeDef htim11;
 extern SPI_HandleTypeDef hspi3;
 
-// external peripherals::
+// external peripherals:
 TemperatureSensor tempsensor(TEMP_DATA_GPIO_Port, TEMP_DATA_Pin);
 
 LCD_Screen lcd(&hspi3,
@@ -40,6 +40,8 @@ LCD_Screen lcd(&hspi3,
 
 SYSTEM_TIME tm = 0;
 KeyPad keys;
+
+volatile bool blue_button_triggered;
 
 unsigned long millis()
 {
@@ -52,6 +54,14 @@ extern "C" void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	if (htim == &htim11)
 	{
 		keys.update(tm++);
+	}
+}
+
+extern "C" void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+	if(GPIO_Pin == B1_Pin)
+	{
+		blue_button_triggered = true;
 	}
 }
 
@@ -119,6 +129,8 @@ struct key_up {};
 struct key_down {};
 struct key_left {};
 struct key_right {};
+
+struct blue_button{};
 struct timeout{};
 
 // nonsense just try guard:
@@ -172,6 +184,13 @@ extern "C" void appmain (void)
 			HAL_PWR_EnterSLEEPMode (
 					PWR_LOWPOWERREGULATOR_ON,
 					PWR_SLEEPENTRY_WFI);
+
+		if (blue_button_triggered)
+		{
+			blue_button_triggered = false;
+			std::cout << "->blue button interrupt " << std::endl;
+			sm.process_event(blue_button{});
+		}
 
 		KeyPadEvent ev;
 		bool has_event = keys.get_next_event(&ev);
