@@ -4,6 +4,8 @@
 // fonts from https://www.eevblog.com/forum/microcontrollers/stm32-nokia-5110-large-font-issue/
 #include "font.h"
 #include <cstring>
+#include<map>
+
 
 #define SPI_TIMEOUT_MS 5
 

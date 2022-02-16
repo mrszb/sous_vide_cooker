@@ -30,7 +30,7 @@ uint8_t KeyPad::raw_scan()
 uint8_t KeyPad::scan()
 {
 	uint8_t keys = 0;
-	for (size_t key_ix=0; key_ix < NUM_OF_KEYS; key_ix++)
+	for (size_t key_ix=0; key_ix < keypad::NUM_OF_KEYS; key_ix++)
 	{
 		if (debouncer[key_ix].is_button_pressed())
 			keys |=  (1 << key_ix);
@@ -44,24 +44,24 @@ std::string KeyPadEvent::to_debug_string() const
 	std::string s;
 	switch (key)
 	{
-		case KEY_RIGHT:
-			s += "RIGHT";
+		case keypad::KEY_RIGHT:
+			s += "[RIGHT]";
 			break;
 
-		case KEY_LEFT:
-			s += "LEFT";
+		case keypad::KEY_LEFT:
+			s += "[LEFT ]";
 			break;
 
-		case KEY_UP:
-			s += "UP";
+		case keypad::KEY_UP:
+			s += "[UP   ]";
 			break;
 
-		case KEY_DOWN:
-			s += "DOWN";
+		case keypad::KEY_DOWN:
+			s += "[DOWN ]";
 			break;
 
 		default:
-			s += "unknown";
+			s += "[!!!!unknown!!!!]";
 			break;
 	}
 
@@ -70,11 +70,11 @@ std::string KeyPadEvent::to_debug_string() const
     switch (evt)
     {
 		case BUTTON_PRESSED:
-			s += "PRESSED";
+			s += "pressed";
 			break;
 
 		case BUTTON_RELEASED:
-			s += "RELEASED";
+			s += "released";
 			break;
 
 		case BUTTON_NO_CHANGE:
@@ -83,7 +83,7 @@ std::string KeyPadEvent::to_debug_string() const
 
     }
 
-	s+= " ";
+	s+= " tm: ";
 	s+= std::to_string(tm);
 
 	return s;
@@ -92,7 +92,7 @@ std::string KeyPadEvent::to_debug_string() const
 void KeyPad::update(SYSTEM_TIME system_time)
 {
 	uint8_t last_scan = raw_scan();
-	for (size_t key_ix=0; key_ix < NUM_OF_KEYS; key_ix++)
+	for (size_t key_ix=0; key_ix < keypad::NUM_OF_KEYS; key_ix++)
 	{
 		auto evt = debouncer[key_ix].update_with_sampling(last_scan & (1 << key_ix));
 		if (evt != BUTTON_NO_CHANGE)
@@ -101,7 +101,7 @@ void KeyPad::update(SYSTEM_TIME system_time)
 			// queue keypad event:
 			//
 			KeyPadEvent padevt;
-			padevt.key = (enum Keys) key_ix;
+			padevt.key = (keypad::Keys) key_ix;
 			padevt.evt = evt;
 			padevt.tm = system_time;
 

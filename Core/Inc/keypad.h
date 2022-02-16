@@ -4,22 +4,25 @@
 #include <string>
 #include "button_debouncer.h"
 
-enum Keys
+namespace keypad
 {
-	KEY_RIGHT = 0,
-	KEY_LEFT,
-	KEY_DOWN,
-	KEY_UP,
+	enum Keys
+	{
+		KEY_RIGHT = 0,
+		KEY_LEFT,
+		KEY_DOWN,
+		KEY_UP,
 
-	//
-	NUM_OF_KEYS
-};
+		//
+		NUM_OF_KEYS
+	};
+}
 
 typedef uint32_t SYSTEM_TIME;
 
 struct KeyPadEvent
 {
-	Keys key;
+	keypad::Keys key;
 	ButtonEvent evt;
 	SYSTEM_TIME tm;
 
@@ -31,7 +34,7 @@ struct KeyPadEvent
 
 class KeyPad
 {
-	ButtonDebouncer debouncer[NUM_OF_KEYS];
+	ButtonDebouncer debouncer[keypad::NUM_OF_KEYS];
 
 	KeyPadEvent evtQueue[KeyPadQLen];
 	KeyPadEvent *pQOut,*pQIn;

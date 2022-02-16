@@ -18,6 +18,8 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include <stdio.h>
+#include <stdbool.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -65,11 +67,19 @@ static void MX_TIM11_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+const bool serial_console = true;
+
 int _write(int file, char *ptr, int len)
 {
-	HAL_UART_Transmit(&huart2, (uint8_t*)ptr, len, HAL_MAX_DELAY);
+	if (serial_console)
+		HAL_UART_Transmit(&huart2, (uint8_t*)ptr, len, HAL_MAX_DELAY);
 	return len;
 }
+
+// TODO
+//int _read(int file, char *ptr, int len)
+
 /* USER CODE END 0 */
 
 /**

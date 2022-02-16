@@ -3,6 +3,8 @@
 #include "WProgram.h"
 #include <random>
 
+namespace {
+
 std::random_device rd;
 std::mt19937 rng(rd());
 std::uniform_real_distribution<> uni(-0.1,0.1);
@@ -18,7 +20,6 @@ const double outputStart = 50;
 const double inputStart = 200;
 const double setpointStart = 200;
 
-
 PID myPID(&input, &output, &setpoint, kp, ki, kd, DIRECT);
 
 //parameters used to simulate the process connected to the pid
@@ -33,8 +34,8 @@ unsigned long evalTime = 0, evalInc = 10,
 unsigned long now = 0;
 
 
-void pid_test_setup() {
-
+void pid_test_setup()
+{
   //working variables
   input = inputStart;
   setpoint = setpointStart;
@@ -140,6 +141,14 @@ void ReportStatus()
   std::cout << now << " " << setpoint << " " << input << " " << output << std::endl;
 }
 
+}
+
+void PID_simulation()
+{
+	pid_test_setup();
+	while (pid_test_loop())
+		;
+}
 
 
 

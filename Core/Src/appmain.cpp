@@ -9,8 +9,12 @@
 #include "lcd.h"
 
 #include "sml.hpp"
+namespace sml = boost::sml;
+
+#include <cassert>
 
 #include "PID_v1.h"
+#undef LIBRARY_VERSION
 #include "PID_AutoTune_v0.h"
 
 #include "WProgram.h"
@@ -25,6 +29,14 @@ extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim10;
 extern TIM_HandleTypeDef htim11;
 extern SPI_HandleTypeDef hspi3;
+
+// external peripherals::
+TemperatureSensor tempsensor(TEMP_DATA_GPIO_Port, TEMP_DATA_Pin);
+
+LCD_Screen lcd(&hspi3,
+  LCD_RST_GPIO_Port, LCD_RST_Pin,
+  LCD_SCE_GPIO_Port, LCD_SCE_Pin,
+  LCD_DC_GPIO_Port, LCD_DC_Pin);
 
 SYSTEM_TIME tm = 0;
 KeyPad keys;
@@ -43,7 +55,7 @@ extern "C" void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	}
 }
 
-void PWM_Blinky()
+void Blinky_PWM_pulsing()
 {
 	int32_t CH3_DC = 0;
 	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
@@ -65,11 +77,75 @@ void PWM_Blinky()
 	}
 }
 
-void PID_simulation()
+int32_t CH3_DC = 50;
+
+void Blinky_PWM()
 {
-	pid_test_setup();
-	while (pid_test_loop())
-		;
+	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
+	TIM3->CCR3 = CH3_DC;
+}
+
+void Blinky_ON()
+{
+	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
+	TIM3->CCR3 = 100;
+}
+
+void Blinky_OFF()
+{
+	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
+	TIM3->CCR3 = 0;
+}
+
+extern void PID_simulation();
+
+void PID_experiment()
+{
+	lcd.write_line(0, "TESTING PID");
+	lcd.write_line(1, " |");
+	lcd.write_line(2, " |");
+	lcd.write_line(3, " |");
+	lcd.write_line(4, "START");
+	PID_simulation();
+	lcd.write_line(3, "-|-");
+	lcd.write_line(4, "END");
+}
+
+namespace sml = boost::sml;
+
+namespace {
+
+struct key_up {};
+struct key_down {};
+struct key_left {};
+struct key_right {};
+struct timeout{};
+
+// nonsense just try guard:
+const auto is_key_down_valid = [](const key_down&) { return true; };
+
+const auto turn_on = [] { Blinky_ON(); std::cout << "action: turning on" << std::endl; };
+const auto turn_off = [] { Blinky_OFF(); std::cout << "action: turning off" << std::endl;};
+const auto turn_pwm = [] { Blinky_PWM(); std::cout << "action: pwm" << std::endl;};
+
+struct state_machine_blinky {
+  auto operator()() const {
+    using namespace sml;
+    return make_transition_table(
+
+      *"led pwm"_s + event<key_up> / turn_on = "led on"_s,
+      "led pwm"_s + event<key_down> / turn_off = "led off"_s,
+
+       "led off"_s + event<key_up> / turn_on = "led on"_s,
+	   "led on"_s + event<key_down> / turn_off = "led off"_s,
+
+       "led off"_s + event<key_right> / turn_pwm = "led pwm"_s,
+	   "led on"_s + event<key_left> / turn_pwm = "led pwm"_s,
+
+       "timed wait"_s + event<timeout> / turn_off = X
+    );
+  }
+};
 }
 
 extern "C" void appmain (void)
@@ -77,26 +153,16 @@ extern "C" void appmain (void)
 	HAL_TIM_Base_Start_IT(&htim11);
 	HAL_TIM_Base_Start_IT(&htim10);
 
-	TemperatureSensor tempsensor(TEMP_DATA_GPIO_Port, TEMP_DATA_Pin);
-
-	LCD_Screen lcd(&hspi3,
-	  LCD_RST_GPIO_Port, LCD_RST_Pin,
-	  LCD_SCE_GPIO_Port, LCD_SCE_Pin,
-	  LCD_DC_GPIO_Port, LCD_DC_Pin);
-
 	lcd.init();
 	lcd.clear();
 
-	//PWM_Blinky();
+	//PID_experiment();
+	Blinky_PWM();
 
-	lcd.write_line(0, "TESTING PID");
-	lcd.write_line(1, " |");
-	lcd.write_line(2, " |");
-	lcd.write_line(3, " |");
-	lcd.write_line(4, "START");
-	//PID_simulation();
-	lcd.write_line(3, "-|-");
-	lcd.write_line(4, "END");
+	using namespace sml;
+
+	sm<state_machine_blinky> sm;
+	assert(sm.is("led pwm"_s));
 
 	while (1)
 	{
@@ -111,10 +177,35 @@ extern "C" void appmain (void)
 		bool has_event = keys.get_next_event(&ev);
 		if (has_event)
 		{
-			std::cout << ev.to_debug_string() << std::endl;
+			std::cout << "->key " << ev.to_debug_string() << std::endl;
 
 		 	if (ev.evt == BUTTON_PRESSED)
 			{
+
+		 		switch (int(ev.key))
+		 		{
+		 			case keypad::KEY_RIGHT:
+		 				sm.process_event(key_right{});
+		 				break;
+
+		 			case keypad::KEY_LEFT:
+		 				sm.process_event(key_left{});
+		 				break;
+
+		 			case keypad::KEY_DOWN:
+		 				sm.process_event(key_down{});
+		 				break;
+
+		 			case keypad::KEY_UP:
+		 				sm.process_event(key_up{});
+		 				break;
+
+		 			default:
+		 				break;
+
+		 		}
+
+/*
 		 		bool sensor_found = tempsensor.start();
 		 		if (sensor_found)
 		 		{
@@ -143,6 +234,7 @@ extern "C" void appmain (void)
 
 		 			delay_us(50000);
 		 		}
+		 		*/
 			}
 		}
 	}
