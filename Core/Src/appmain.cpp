@@ -21,6 +21,9 @@ namespace sml = boost::sml;
 #include "WProgram.h"
 #include "pid_tester.h"
 
+#include <iomanip>
+#include <iostream>
+
 static bool _use_sleep_mode = false;
 
 // TIM10 running at 1MHZ for us delays
@@ -69,6 +72,37 @@ extern "C" void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 
 extern "C" void ReInit_PWM_CookerPin(void);
 
+//////////////////////////////////////////////////
+
+
+struct PidParams
+{
+	double Kp;
+	double Ki;
+	double Kd;
+};
+
+
+PidParams _pidParams = {40, 0.5, 1};
+
+double _setpoint;
+double _inputPid;
+double _outputPid;
+
+PID _pid (&_inputPid, &_outputPid, &_setpoint,
+		_pidParams.Kp, _pidParams.Ki, _pidParams.Kd, DIRECT);
+
+double _atuneStep=500;
+double _atuneNoise=1;
+unsigned int _atuneLookback=20;
+
+bool tuning = false;
+
+PID_ATune aTune(&_inputPid, &_outputPid);
+SYSTEM_TIME _time_window = 3000;
+
+///////////////////////////
+
 
 void Blinky_toggling()
 {
@@ -109,6 +143,15 @@ void Blinky_PWM()
 	ReInit_PWM_CookerPin();
 	TIM3->CCR3 = CH3_DC * 10000 / 100;
 	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
+	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
+}
+
+void adjust_duty_cycle(int dc)
+{
+	TIM3->CCR3 = dc * 10000 / 100;
+	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
+
+	TIM2->CCR1 = dc * 1000 / 100;
 	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
 }
 
@@ -208,7 +251,20 @@ extern "C" void appmain (void)
 	sm<state_machine_blinky> sm;
 	assert(sm.is("led pwm"_s));
 
-	bool sensor_found = tempsensor.start();
+	bool has_temperature_sensor = tempsensor.start();
+	if (has_temperature_sensor)
+	{
+		// start temperature measurement
+		tempsensor.write (tempsensor.CMD_SKIP_ROM);
+		tempsensor.write (tempsensor.CMD_CONVERT_T);
+	}
+
+	_setpoint = 54;
+
+	_pid.SetOutputLimits(0, 100);
+	_pid.SetMode(AUTOMATIC);
+
+	SYSTEM_TIME _last_time_event = 0;
 
 	while (1)
 	{
@@ -257,28 +313,51 @@ extern "C" void appmain (void)
 		 				break;
 
 		 		}
+			}
+		}
 
-		 		if (sensor_found)
-		 		{
-					tempsensor.write (tempsensor.CMD_SKIP_ROM);
-					tempsensor.write (tempsensor.CMD_CONVERT_T); 
-					tempsensor.wait_conversion();
+	   int elapsed = tm -_last_time_event;
+	   if (elapsed >= 1000)
+	   {
+		   _last_time_event = tm;
 
+			if (has_temperature_sensor)
+			{
+
+				if (tempsensor.is_conversion_done())
+				{
 					tempsensor.start ();
-					HAL_Delay(1);
+					tempsensor.wait_conversion();
 					tempsensor.write (tempsensor.CMD_SKIP_ROM);
-					tempsensor.write (tempsensor.CMD_READ_SCRATCHPAD); 
+					tempsensor.write (tempsensor.CMD_READ_SCRATCHPAD);
 
 					auto b1 = tempsensor.read();
 					auto b2 = tempsensor.read();
 
 					uint16_t temp = (b2 << 8) |  b1;
 					auto t = static_cast<double>(temp)/16.0;
-					std::cout << "->" << "temp: " << t << "C" << std::endl;
-		 		}
+					//std::cout << "->" << "temp: " << t << "C" << std::endl;
 
-			}
+					_inputPid = t;
+				}
+
+				if (_pid.Compute())
+				{
+					adjust_duty_cycle(_outputPid);
+
+					int ms = tm % 1000;
+					std::cout << int(tm/1000) << "."
+							<< std::setfill('0') << std::setw(3) << (ms % 100) << " " << _setpoint << " " << _inputPid << " " << _outputPid << "%" << std::endl;
+				}
+
+				tempsensor.start();
+				tempsensor.write (tempsensor.CMD_SKIP_ROM);
+				tempsensor.write (tempsensor.CMD_CONVERT_T);
+
+
+	   	   }
 		}
+
 	}
 }
 

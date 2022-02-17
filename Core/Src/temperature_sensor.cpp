@@ -25,6 +25,12 @@ void TemperatureSensor::pull_data_pin_down(void)
 	HAL_GPIO_WritePin (_GPIOx, _GPIO_Pin, GPIO_PIN_RESET);
 }
 
+bool TemperatureSensor::is_conversion_done(void)
+{
+	set_data_pin_as_input();
+	return  (HAL_GPIO_ReadPin (_GPIOx, _GPIO_Pin) == GPIO_PIN_SET);
+}
+
 void TemperatureSensor::wait_conversion(void)
 {
 	set_data_pin_as_input();

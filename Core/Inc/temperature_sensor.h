@@ -19,6 +19,7 @@ public:
 
 	TemperatureSensor(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin);
 	bool start();
+	bool is_conversion_done(void);
 	void wait_conversion();
 
 	void write (uint8_t data);
