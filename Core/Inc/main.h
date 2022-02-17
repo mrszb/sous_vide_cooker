@@ -67,6 +67,8 @@ void Error_Handler(void);
 #define BTN_UP_GPIO_Port GPIOC
 #define BTN_DOWN_Pin GPIO_PIN_1
 #define BTN_DOWN_GPIO_Port GPIOC
+#define LCD_BACKLIGHT_Pin GPIO_PIN_0
+#define LCD_BACKLIGHT_GPIO_Port GPIOA
 #define USART_TX_Pin GPIO_PIN_2
 #define USART_TX_GPIO_Port GPIOA
 #define USART_RX_Pin GPIO_PIN_3

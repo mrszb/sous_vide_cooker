@@ -26,6 +26,7 @@ static bool _use_sleep_mode = false;
 // TIM10 running at 1MHZ for us delays
 // TIM11 periodic scanning keyboard
 
+extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim10;
 extern TIM_HandleTypeDef htim11;
@@ -106,8 +107,9 @@ int32_t CH3_DC = 25;
 void Blinky_PWM()
 {
 	ReInit_PWM_CookerPin();
+	TIM3->CCR3 = CH3_DC * 10000 / 100;
 	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
-	TIM3->CCR3 = CH3_DC;
+	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
 }
 
 void Blinky_ON()
@@ -118,12 +120,18 @@ void Blinky_ON()
 
 	GPIO_SetPinAsOutput(COOKER_GPIO_Port, COOKER_Pin);
 	HAL_GPIO_WritePin (COOKER_GPIO_Port, COOKER_Pin, GPIO_PIN_SET);
+
+	GPIO_SetPinAsOutput(LCD_BACKLIGHT_GPIO_Port, LCD_BACKLIGHT_Pin);
+	HAL_GPIO_WritePin (LCD_BACKLIGHT_GPIO_Port, LCD_BACKLIGHT_Pin, GPIO_PIN_SET);
 }
 
 void Blinky_OFF()
 {
 	GPIO_SetPinAsOutput(COOKER_GPIO_Port, COOKER_Pin);
 	HAL_GPIO_WritePin (COOKER_GPIO_Port, COOKER_Pin, GPIO_PIN_RESET);
+
+	GPIO_SetPinAsOutput(LCD_BACKLIGHT_GPIO_Port, LCD_BACKLIGHT_Pin);
+	HAL_GPIO_WritePin (LCD_BACKLIGHT_GPIO_Port, LCD_BACKLIGHT_Pin, GPIO_PIN_RESET);
 }
 
 extern void PID_simulation();
