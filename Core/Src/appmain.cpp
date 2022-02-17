@@ -189,6 +189,9 @@ extern "C" void appmain (void)
 	lcd.init();
 	lcd.clear();
 
+	lcd.write_line(0, "Hello");
+	lcd.write_line(1, "  World");
+
 	//PID_experiment();
 	Blinky_PWM();
 
@@ -265,8 +268,6 @@ extern "C" void appmain (void)
 					auto t = static_cast<double>(temp)/16.0;
 					std::cout << "->" << "temp: " << t << "C" << std::endl;
 		 		}
-
-
 
 			}
 		}
