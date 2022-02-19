@@ -1,5 +1,5 @@
-
-cmake_minimum_required(VERSION 3.19)
+message(STATUS "The CMake version used is ${CMAKE_VERSION}")
+cmake_minimum_required(VERSION 3.19...${CMAKE_VERSION})
 
 project(cooker)
 
@@ -21,6 +21,11 @@ foreach (filename catch_amalgamated.hpp catch_amalgamated.cpp)
   file(COPY  ${catch2_SOURCE_DIR}/extras/${filename} DESTINATION ${CMAKE_CURRENT_SOURCE_DIR} )
 endforeach()
 
+if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
+  message(STATUS "Set default build type to Release")
+ 	set(CMAKE_BUILD_TYPE Release)
+endif()
+
 add_executable(tests test.cpp)
 
 target_link_libraries(tests PRIVATE Catch2::Catch2)
@@ -29,9 +34,7 @@ if (TARGET Catch2::Catch2WithMain)
     target_link_libraries(tests PRIVATE Catch2::Catch2WithMain)
 endif()
 
-
-#add_test(sm_test tests)
-
 include(CTest)
 include(Catch)
 catch_discover_tests(tests)
+enable_testing()
