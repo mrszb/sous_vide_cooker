@@ -27,6 +27,7 @@ if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
 endif()
 
 add_executable(tests test.cpp)
+target_compile_features(tests PRIVATE cxx_std_17)
 
 target_link_libraries(tests PRIVATE Catch2::Catch2)
 if (TARGET Catch2::Catch2WithMain)

@@ -1,4 +1,6 @@
-//#include <catch2/reporters/catch_reporter_console.h>
+#include "../Core/Inc/sml.hpp"
+#include "../Core/Inc/sm_blinky.hpp"
+
 #include "catch_amalgamated.hpp"
 
 

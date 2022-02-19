@@ -2,6 +2,8 @@
 #define INC_SM_BLINKY_HPP_
 
 #include "blinky_actions.h"
+#include <iostream>
+
 namespace sml = boost::sml;
 
 namespace {
@@ -28,14 +30,14 @@ struct state_machine_blinky {
     return make_transition_table(
 
       *"led pwm"_s + event<key_up> / turn_on = "led on"_s
-	  ,"led pwm"_s + event<key_down> / turn_off = "led off"_s
-	  ,"led off"_s + event<key_up> / turn_on = "led on"_s
-	  ,"led on"_s + event<key_down> / turn_off = "led off"_s
+      ,"led pwm"_s + event<key_down> / turn_off = "led off"_s
+      ,"led off"_s + event<key_up> / turn_on = "led on"_s
+      ,"led on"_s + event<key_down> / turn_off = "led off"_s
       ,"led off"_s + event<key_right>  / turn_pwm = "led pwm"_s
-	  ,"led on"_s + event<key_right> / turn_pwm = "led pwm"_s
+      ,"led on"_s + event<key_right> / turn_pwm = "led pwm"_s
 
-	  ,"led pwm"_s + sml::on_entry<_> / [] { std::cout << "pwm entry" << std::endl; }
-	  ,"led pwm"_s + sml::on_exit<_>  / [] { std::cout << "pwm exit" << std::endl; }
+      ,"led pwm"_s + sml::on_entry<_> / [] { std::cout << "pwm entry" << std::endl; }
+      ,"led pwm"_s + sml::on_exit<_>  / [] { std::cout << "pwm exit" << std::endl; }
 
       ,"timed wait"_s + event<timeout> / turn_off = X
     );
