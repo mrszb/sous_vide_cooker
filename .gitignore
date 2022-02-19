@@ -1,3 +1,6 @@
 Debug/*
 *.launch
 .settings/*
+tests/Testing/**
+tests/build/**
+tests/catch_amalgamated*
