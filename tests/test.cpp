@@ -3,12 +3,9 @@
 
 #include "catch_amalgamated.hpp"
 
+using namespace boost::sml;
 
-static int Factorial( int number ) {
-   return number <= 1 ? number : Factorial( number - 1 ) * number;  // fail
-// return number <= 1 ? 1      : Factorial( number - 1 ) * number;  // pass
-}
-
-TEST_CASE( "Factorial of 0 is 1 (fail)", "[single-file]" ) {
-    REQUIRE( Factorial(0) == 1 );
+TEST_CASE( "init sm", "[single-file]" ) {
+    sm<state_machine_blinky> sm;
+	REQUIRE(sm.is("led pwm"_s));
 }
