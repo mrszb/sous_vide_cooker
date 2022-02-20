@@ -284,6 +284,9 @@ void change_param(const char* name, int dir)
 		else if (dir < 0)
 			_pidParams.Kp -= 0.5;
 
+		if (_pidParams.Kp < 0.0)
+			_pidParams.Kp = 0.0;
+
 		_pid.SetTunings(_pidParams.Kp, _pidParams.Ki, _pidParams.Kd);
 	}
 
@@ -294,6 +297,9 @@ void change_param(const char* name, int dir)
 		else if (dir < 0)
 			_pidParams.Ki -= 0.5;
 
+		if (_pidParams.Ki < 0.0)
+			_pidParams.Ki = 0.0;
+
 		_pid.SetTunings(_pidParams.Kp, _pidParams.Ki, _pidParams.Kd);
 	}
 	if (std::string(name) == "D")
@@ -302,6 +308,9 @@ void change_param(const char* name, int dir)
 			_pidParams.Kd += 0.5;
 		else if (dir < 0)
 			_pidParams.Kd -= 0.5;
+
+		if (_pidParams.Kd < 0.0)
+			_pidParams.Kd = 0.0;
 
 		_pid.SetTunings(_pidParams.Kp, _pidParams.Ki, _pidParams.Kd);
 	}
