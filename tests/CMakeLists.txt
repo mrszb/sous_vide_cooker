@@ -11,6 +11,12 @@ endforeach()
 
 add_executable(tests test.cpp)
 
+if(MSVC)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /std:c++latest")
+else(MSVC)
+target_compile_features(tests PRIVATE cxx_std_17)
+endif(MSVC)
+
 target_link_libraries(tests PRIVATE Catch2::Catch2)
 if (TARGET Catch2::Catch2WithMain)
     # link Catch2::Catch2Main only if it exists (so probably catch2 v3)
