@@ -2,5 +2,5 @@ Debug/*
 *.launch
 .settings/*
 tests/Testing/**
-tests/build/**
+**/build
 tests/catch_amalgamated*
