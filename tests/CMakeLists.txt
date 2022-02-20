@@ -17,6 +17,8 @@ else(MSVC)
 target_compile_features(tests PRIVATE cxx_std_17)
 endif(MSVC)
 
+target_include_directories(tests PRIVATE ${PROJECT_SOURCE_DIR}/Core/Inc)
+
 target_link_libraries(tests PRIVATE Catch2::Catch2)
 if (TARGET Catch2::Catch2WithMain)
     # link Catch2::Catch2Main only if it exists (so probably catch2 v3)

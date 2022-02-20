@@ -1,6 +1,7 @@
 #ifndef INC_SM_BLINKY_HPP_
 #define INC_SM_BLINKY_HPP_
 
+#include "sml.hpp"
 #include "blinky_actions.h"
 #include <iostream>
 
