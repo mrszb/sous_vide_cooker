@@ -91,11 +91,11 @@ struct PidParams
 	double Kd;
 };
 
-PidParams _pidParams = {10, -0.5, 0};
+PidParams _pidParams = {10, 0.5, 0};
 
 double _setpoint;
-double _inputPid;
-double _outputPid;
+double _inputPid = 0;
+double _outputPid = 0;
 
 PID _pid (&_inputPid, &_outputPid, &_setpoint,
 		_pidParams.Kp, _pidParams.Ki, _pidParams.Kd, DIRECT);
@@ -150,6 +150,9 @@ void parameter_screen(const char* name, double& ref)
 	std::ostringstream out;
 	out << " " << ref;
 	lcd.write_line(1, out.str());
+
+	for (int i = 2; i < 6; i++)
+		lcd.write_line(i, "");
 }
 
 void refresh_screen(SCREEN_STYLE style)
@@ -173,8 +176,11 @@ void refresh_screen(SCREEN_STYLE style)
 			lcd.write_line(0, "Setpoint:");
 
 			std::ostringstream out;
-			out << " " << _setpoint;
+			out << " " << _setpoint << "C";
 			lcd.write_line(1, out.str());
+
+			for (int i = 2; i < 6; i++)
+				lcd.write_line(i, "");
 			break;
 		}
 
@@ -186,7 +192,33 @@ void refresh_screen(SCREEN_STYLE style)
 
 			std::ostringstream out;
 			out << " " << _setpoint;
-			lcd.write_line(1, out.str());
+
+			switch (_pid.GetMode())
+			{
+				case MANUAL:
+					lcd.write_line(1, "MANUAL");
+					{
+						std::ostringstream out;
+						out << " " << _inputPid << "C";
+						lcd.write_line(2, out.str());
+					}
+					break;
+
+				case AUTOMATIC:
+					lcd.write_line(1, "AUTO");
+					{
+						std::ostringstream out;
+						out << " " << _inputPid << "C";
+						lcd.write_line(2, out.str());
+					}
+					{
+						std::ostringstream out;
+						out << " " << _outputPid << "%";
+						lcd.write_line(3, out.str());
+					}
+					break;
+			}
+
 			break;
 		}
 
@@ -235,6 +267,54 @@ const void run_screen()
 	}
 }
 
+void change_param(const char* name, int dir)
+{
+	if (std::string(name) == "SP")
+	{
+		if (dir > 0)
+			_setpoint += 1.0;
+		else if (dir < 0)
+			_setpoint -= 1.0;
+	}
+
+	if (std::string(name) == "P")
+	{
+		if (dir > 0)
+			_pidParams.Kp += 0.5;
+		else if (dir < 0)
+			_pidParams.Kp -= 0.5;
+
+		_pid.SetTunings(_pidParams.Kp, _pidParams.Ki, _pidParams.Kd);
+	}
+
+	if (std::string(name) == "I")
+	{
+		if (dir > 0)
+			_pidParams.Ki += 0.5;
+		else if (dir < 0)
+			_pidParams.Ki -= 0.5;
+
+		_pid.SetTunings(_pidParams.Kp, _pidParams.Ki, _pidParams.Kd);
+	}
+	if (std::string(name) == "D")
+	{
+		if (dir > 0)
+			_pidParams.Kd += 0.5;
+		else if (dir < 0)
+			_pidParams.Kd -= 0.5;
+
+		_pid.SetTunings(_pidParams.Kp, _pidParams.Ki, _pidParams.Kd);
+	}
+
+	if (std::string(name) == "RUN")
+	{
+		if (dir > 0)
+			_pid.SetMode(AUTOMATIC);
+		else if (dir < 0)
+			_pid.SetMode(MANUAL);
+	}
+}
+
 #endif
 
 
@@ -260,6 +340,8 @@ extern "C" void appmain (void)
 	assert(sm.is("led pwm"_s));
 
 #elif _FW == FW_PID_UI
+	_setpoint = 20;
+
 	sm<state_machine_pid_ui> sm;
 	assert(sm.is("OFF"_s));
 
@@ -361,11 +443,16 @@ extern "C" void appmain (void)
 					//std::cout << "->" << "temp: " << t << "C" << std::endl;
 
 					_inputPid = t;
+					if (sm.is("RUN"_s))
+						refresh_screen(SCREEN_RUN);
 				}
 
 				if (_pid.Compute())
 				{
 					adjust_cooker_duty_cycle(_outputPid);
+
+					if (sm.is("RUN"_s))
+						refresh_screen(SCREEN_RUN);
 
 					int ms = tm % 1000;
 					std::cout << int(tm/1000) << "."
