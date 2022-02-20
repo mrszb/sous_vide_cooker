@@ -2,16 +2,14 @@
 #include <string>
 #include <cstring>
 #include <iostream>
+#include <iomanip>
+#include <iostream>
 
 #include "keypad.h"
 #include "delay_us.h"
 #include "temperature_sensor.h"
 #include "lcd.h"
 #include "gpio_mode.h"
-
-#include "sml.hpp"
-namespace sml = boost::sml;
-
 #include <cassert>
 
 #include "PID_v1.h"
@@ -21,10 +19,19 @@ namespace sml = boost::sml;
 #include "WProgram.h"
 #include "pid_tester.h"
 
-#include <iomanip>
-#include <iostream>
+#define FW_RAW_BLINKY 1
+#define	FW_STATE_MACHINE_BLINKY  2
+#define FW_PID_UI 3
 
-#include "sm_blinky.hpp"
+//#define _FW FW_STATE_MACHINE_BLINKY
+#define _FW FW_PID_UI
+
+#if _FW == FW_STATE_MACHINE_BLINKY
+	#include "sm_blinky.hpp"
+#elif _FW == FW_PID_UI
+	#include "sm_pid_ui.hpp"
+#endif
+
 
 static bool _use_sleep_mode = false;
 
@@ -84,8 +91,7 @@ struct PidParams
 	double Kd;
 };
 
-
-PidParams _pidParams = {40, 0.5, 1};
+PidParams _pidParams = {10, -0.5, 0};
 
 double _setpoint;
 double _inputPid;
@@ -108,7 +114,13 @@ void adjust_cooker_duty_cycle(int dc)
 	TIM3->CCR3 = dc * 10000 / 100;
 	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
 
-	TIM2->CCR1 = dc * 1000 / 100;
+	//TIM2->CCR1 = dc * 1000 / 100;
+	//HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
+}
+
+void lcd_screen_on(int dc)
+{
+	TIM2->CCR1 = dc * 10000 / 100;
 	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
 }
 
@@ -127,6 +139,105 @@ void PID_experiment()
 	lcd.write_line(4, "END");
 }
 
+#if _FW == FW_PID_UI
+
+void parameter_screen(const char* name, double& ref)
+{
+	HAL_GPIO_WritePin (LCD_BACKLIGHT_GPIO_Port, LCD_BACKLIGHT_Pin, GPIO_PIN_SET);
+
+	lcd.write_line(0, name);
+
+	std::ostringstream out;
+	out << " " << ref;
+	lcd.write_line(1, out.str());
+}
+
+void refresh_screen(SCREEN_STYLE style)
+{
+	switch (style)
+	{
+		case SCREEN_OFF:
+		{
+			GPIO_SetPinAsOutput(LCD_BACKLIGHT_GPIO_Port, LCD_BACKLIGHT_Pin);
+			HAL_GPIO_WritePin (LCD_BACKLIGHT_GPIO_Port, LCD_BACKLIGHT_Pin, GPIO_PIN_RESET);
+
+			for (int i = 0; i < 6; i++)
+				lcd.write_line(i, "");
+			break;
+		}
+
+		case SCREEN_SETPOINT:
+		{
+			HAL_GPIO_WritePin (LCD_BACKLIGHT_GPIO_Port, LCD_BACKLIGHT_Pin, GPIO_PIN_SET);
+
+			lcd.write_line(0, "Setpoint:");
+
+			std::ostringstream out;
+			out << " " << _setpoint;
+			lcd.write_line(1, out.str());
+			break;
+		}
+
+		case SCREEN_RUN:
+		{
+			HAL_GPIO_WritePin (LCD_BACKLIGHT_GPIO_Port, LCD_BACKLIGHT_Pin, GPIO_PIN_SET);
+
+			lcd.write_line(0, "Run:");
+
+			std::ostringstream out;
+			out << " " << _setpoint;
+			lcd.write_line(1, out.str());
+			break;
+		}
+
+		case SCREEN_SET_P:
+			parameter_screen("Kp", _pidParams.Kp);
+			break;
+
+		case SCREEN_SET_I:
+			parameter_screen("Ki", _pidParams.Ki);
+			break;
+
+		case SCREEN_SET_D:
+			parameter_screen("Kd", _pidParams.Kd);
+			break;
+
+	}
+}
+
+
+const void run_screen()
+{
+	lcd.write_line(0, "Running");
+
+	{
+		std::ostringstream out;
+		out << " " << _setpoint;
+		lcd.write_line(1, out.str());
+	}
+
+	{
+		std::ostringstream out;
+		out << "Kp: " << _pidParams.Kp;
+		lcd.write_line(2, out.str());
+	}
+
+	{
+		std::ostringstream out;
+		out << " " << _setpoint;
+		lcd.write_line(3, out.str());
+	}
+
+	{
+		std::ostringstream out;
+		out << " " << _setpoint;
+		lcd.write_line(4, out.str());
+	}
+}
+
+#endif
+
+
 extern "C" void appmain (void)
 {
 	HAL_TIM_Base_Start_IT(&htim11);
@@ -139,12 +250,30 @@ extern "C" void appmain (void)
 	lcd.write_line(1, "  World");
 
 	//PID_experiment();
-	Blinky_PWM();
 
 	using namespace sml;
 
+#if _FW == FW_STATE_MACHINE_BLINKY
+	Blinky_PWM();
+
 	sm<state_machine_blinky> sm;
 	assert(sm.is("led pwm"_s));
+
+#elif _FW == FW_PID_UI
+	sm<state_machine_pid_ui> sm;
+	assert(sm.is("OFF"_s));
+
+	lcd_screen_on(60);
+
+	// ReInit_PWM_CookerPin();
+	TIM3->CCR3 = 0 * 10000 / 100;
+	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
+
+	const int duty_cycle_lcd_backlight = 100;
+	TIM2->CCR1 = duty_cycle_lcd_backlight  * 10000 / 100;
+	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
+
+#endif
 
 	bool has_temperature_sensor = tempsensor.start();
 	if (has_temperature_sensor)
@@ -154,10 +283,8 @@ extern "C" void appmain (void)
 		tempsensor.write (tempsensor.CMD_CONVERT_T);
 	}
 
-	_setpoint = 54;
-
 	_pid.SetOutputLimits(0, 100);
-	_pid.SetMode(AUTOMATIC);
+	_pid.SetMode(MANUAL);
 
 	SYSTEM_TIME _last_time_event = 0;
 

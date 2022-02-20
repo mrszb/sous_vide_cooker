@@ -50,6 +50,8 @@ void Blinky_PWM()
 	ReInit_PWM_CookerPin();
 	TIM3->CCR3 = CH3_DC * 10000 / 100;
 	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
+
+	TIM2->CCR1 = CH3_DC * 10000 / 100;
 	HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
 }
 
