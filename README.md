@@ -14,13 +14,13 @@ This project is attempt to create a system for this culinary technique. It is he
 
 
 ## Hardware description
-System is closed loop system running [rice cooker](https://www.amazon.com/gp/product/B00197TJ3C). Data provided by [High Temp Waterproof DS18B20 Digital temperature sensor](https://www.adafruit.com/product/642]) placed inside the cooker pot is processed by the PID algorithm run on a controller built around [STM32 Nucleo-64 development board](https://www.st.com/en/evaluation-tools/nucleo-f411re.html). 
+Closed loop system driving [rice cooker](https://www.amazon.com/gp/product/B00197TJ3C). Temperature value provided by [High Temp Waterproof DS18B20 Digital temperature sensor](https://www.adafruit.com/product/642]) placed inside the cooker pot is processed by the PID algorithm run on a controller built around [STM32 Nucleo-64 development board](https://www.st.com/en/evaluation-tools/nucleo-f411re.html). 
 
-This board features STM32F411RE Dev Board, STM32F411RE Cortex-M4 MCU.
+This board features STM32F411RE Cortex-M4 MCU.
 Output from the board controls LED indicator and [solid state relay](https://www.amazon.com/gp/product/B01MCWO35P) which swiches power to the cooker heating element. 
 
-User interaction is provided by keypad of four keys ([UP], [DOWN], [RIGHT], [LEFT]) and user button capable generating interrupt. 
-Information is provided to user by retro style [Nokia 5110 monochrome LCD](https://www.adafruit.com/product/338) and through USART which can be directly connected to the PC because board has USB-to-serial bridge.
+User interaction is provided by the keypad with four keys ([UP], [DOWN], [RIGHT], [LEFT]) Available as well is extra BLUE user button capable of generating external interrupt. 
+Information is provided to user by the retro style [Nokia 5110 monochrome LCD](https://www.adafruit.com/product/338) and through USART which can be directly connected to the PC because board has USB-to-serial bridge.
 
 ```
 
@@ -102,7 +102,6 @@ Its C++ compiler supports C++17 features if enabled.
 State machine library [SML](https://github.com/boost-ext/sml)  used here requires at least C++14 features.
 
 ---
-
 
 **button_debouncer.cpp**
 
@@ -223,8 +222,9 @@ Since we have only one sensor I did not try to implement/use advanced features l
 ---
 **lcd.cpp**
 
-implements driver for the LCD screen. It is built out around the master only SPI protocol run by CPU built in peripheral system and toggling GPIO pins to reset, enable/disable LCD driver chip, switch between data/command mode
-I tried to use PWM to drive backlight pin of the LCD screen with no success (random flashes). My understanding is the chip generates power/voltage for backlight internally. GPIO pin just turns backlight on/off
+implements driver for the LCD screen. It is built out around the master only SPI protocol run by CPU built in peripheral system and toggling GPIO pins to reset, enable/disable LCD driver chip, switch between data/command mode.
+
+I tried to use PWM mode to drive backlight pin of the LCD screen with no success (random flashes). My understanding is the chip generates power/voltage for backlight internally. GPIO pin now just turns backlight on/off.
 
 ---
 **PID routines**
@@ -235,7 +235,7 @@ I tried to use PWM to drive backlight pin of the LCD screen with no success (ran
 
 
 are used without modification.
-These just needed me to implement WProgram.h header and provide unsigned long millis() counting miliseconds since system boot.
+These needed to implement WProgram.h header and provide them unsigned long millis() counting miliseconds since system boot.
 
 Input of the controller is temperature inside of the cooker in Celsius.
 Output of the PID controler is restricted to values between 0 and 100 and expresed as duty cycle % of the cooker PWM pin. This pin drives solid state relay switching power to the cooker heating element.
