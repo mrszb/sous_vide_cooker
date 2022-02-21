@@ -264,7 +264,7 @@ In hibernation one could expect the controller to stay ready on battery power fo
 
 
 ## Debugging / testing 
-As a very first thing I redirected standard library output to USART. This board has serial to usb bridge. All standard library output shows as text on my serial terminal;
+As a very first thing I redirected standard library _write_ to USART. This board has serial to USB bridge. All standard library output shows as text on my serial terminal.
 
 ![image](./docs/serial_debug.png)
 
