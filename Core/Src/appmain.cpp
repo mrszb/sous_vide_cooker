@@ -447,7 +447,7 @@ extern "C" void appmain (void)
 			sm.process_event(blue_button{});
 		}
 
-		// any events (pressed/released) from keyad
+		// any events (pressed/released) from keypad
 		KeyPadEvent ev;
 		bool has_event = keys.get_next_event(&ev);
 		if (has_event)
