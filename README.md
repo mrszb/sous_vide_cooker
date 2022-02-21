@@ -211,7 +211,7 @@ This will be area of next stage development.
 
 Besides of state machine driven UI there is another algorithm running as well. It is PID controller routine. See **appmain.cpp** for details.
 
-It uses input provided by the temperature sensor temperature_sensor.cpp and drives solid state relay using PWN input of the Timer 3.
+It uses input provided by the temperature sensor temperature_sensor.cpp and drives solid state relay using PWM input of the Timer 3.
 
 ---
 
@@ -222,20 +222,23 @@ Since we have only one sensor I did not try to implement/use advanced features l
 
 ---
 **lcd.cpp**
+
 implements driver for the LCD screen. It is built out around the master only SPI protocol run by CPU built in peripheral system and toggling GPIO pins to reset, enable/disable LCD driver chip, switch between data/command mode
 I tried to use PWM to drive backlight pin of the LCD screen with no success (random flashes). My understanding is the chip generates power/voltage for backlight internally. GPIO pin just turns backlight on/off
 
 ---
-PID routines
+**PID routines**
 
 **Arduino libraries by Brett Beauregard**
 
 **PID_v1/PID_Autotune_v0 {.h/.cpp}** 
+
+
 are used without modification.
 These just needed me to implement WProgram.h header and provide unsigned long millis() counting miliseconds since system boot.
 
 ---
-USART
+**USART**
 Simple _write implementation sending all characters to USART2 redirects stdout to the serial port.
 see in **main.c**
 ```
@@ -247,19 +250,21 @@ int _write(int file, char *ptr, int len)
 }
 ```
 ---
-Subdirectory **tests** has cmake managed infrastructure for testing Core routines outside of the system. Plan was to test state machine and run these tests on the host machine.
+Subdirectory **tests** 
+
+has cmake managed infrastructure for testing Core routines outside of the system. Plan was to test state machine and run these tests on the host machine.
 It should work for gcc and MSVC however turns out Microsoft C++ compiler does not have the same features. Instead of using literal _s for states as "my_state"_s one has to write state<my_state>.
 
 ## Producion ready development.
 This controler needs improved battery management (hibernation mode), better screens.
 It needs EEPROM to store PID parameters or at least its emulation.
 
-# Battery
-In hibernation one could expect the controller to be ready on battery for several weeks
+## Battery
+In hibernation one could expect the controller to stay ready on battery power for several weeks.
 
 
-# Debugging / testing 
-As a very first thing I redirected std output to USART. This board has serial to usb bridge. All standard library output shows as text on my serial terminal;
+## Debugging / testing 
+As a very first thing I redirected standard library output to USART. This board has serial to usb bridge. All standard library output shows as text on my serial terminal;
 
 ![image](./docs/serial_debug.png)
 
