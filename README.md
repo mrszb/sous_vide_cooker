@@ -237,6 +237,9 @@ I tried to use PWM to drive backlight pin of the LCD screen with no success (ran
 are used without modification.
 These just needed me to implement WProgram.h header and provide unsigned long millis() counting miliseconds since system boot.
 
+Input of the controller is temperature inside of the cooker in Celsius.
+Output of the PID controler is restricted to values between 0 and 100 and expresed as duty cycle % of the cooker PWM pin. This pin drives solid state relay switching power to the cooker heating element.
+
 ---
 **USART**
 Simple _write implementation sending all characters to USART2 redirects stdout to the serial port.
@@ -255,7 +258,7 @@ Subdirectory **tests**
 has cmake managed infrastructure for testing Core routines outside of the system. Plan was to test state machine and run these tests on the host machine.
 It should work for gcc and MSVC however turns out Microsoft C++ compiler does not have the same features. Instead of using literal _s for states as "my_state"_s one has to write state<my_state>.
 
-## Producion ready development.
+## Production ready development.
 This controler needs improved battery management (hibernation mode), better screens.
 It needs EEPROM to store PID parameters or at least its emulation.
 
