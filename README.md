@@ -255,7 +255,7 @@ int _write(int file, char *ptr, int len)
 ---
 Subdirectory **tests** 
 
-has cmake managed infrastructure for testing Core routines outside of the system. Plan was to test state machine and run these tests on the host machine.
+has CMake managed infrastructure for testing Core routines witch Catch2 v3 outside of the system (e.g on the toolchain host). Plan was to test state machine and run these tests on the host machine.
 It should work for gcc and MSVC however turns out Microsoft C++ compiler does not have the same features. Instead of using literal _s for states as "my_state"_s one has to write state<my_state>.
 
 ## Production ready development.
@@ -271,7 +271,7 @@ As a very first thing I redirected standard library _write_ to USART. This board
 
 ![image](./docs/serial_debug.png)
 
-The Catch2v3/CMake setup in tests would subdirectory enable me to test some algorithms on host.
+The CMake/Catch2 v3 setup in tests would subdirectory enable me to test some algorithms on host.
 
 Main mode of testing was writing small blinky style programs and state machines to familiarize myself with the HW while writing drivers. Eventually state machine was replaced.
 
